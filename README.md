@@ -1,1 +1,1 @@
-# cocobot_dwa
+# cocobot_dwa_planner
