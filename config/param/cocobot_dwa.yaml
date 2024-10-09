@@ -1,0 +1,33 @@
+# 制御周波数[Hz]
+hz: 10  # ループ周波数 [Hz]
+
+# 評価関数の重みづけ定数
+weight_heading: 0.8          # 評価関数1項目　重みづけ定数
+weight_dist: 1.5  # 評価関数2項目　重みづけ定数
+weight_vel: 0.4  # 評価関数3項目　重みづけ定数
+
+# 評価関数関連（重みづけ定数以外）
+search_range: 7.0            # 評価関数２項目(distance)探索範囲 [m]
+margin: 0.55                  # 障害物とロボットの衝突半径（マージン込み） [m]
+
+# CCV(Dynamic Window関連)
+min_vel: 0.0         # 最低並進速度 [m/s]
+max_vel: 1.2         # 最高並進速度 [m/s]
+max_yawrate: 4.5     # 最高旋回速度 [rad/s]
+max_accel: 100.0      # 最高並進加速度 [m/s^2]
+max_yawaccel: 100.0   # 最高旋回加速度 [rad/s^2]
+
+# 許容誤差[m]
+goal_tolerance: 0.5  # goalに対する許容誤差 [m]
+
+# frame_id
+world_frame: "odom"            # 目標軌道
+robot_frame: "base_footprint"  # ロボット
+
+# 速度
+vel_reso: 0.1  # 並進速度を計算するときの刻み幅 [m/s]
+yawrate_reso: 0.1  # 旋回速度を計算するときの刻み幅 [rad/s]
+
+# 予測時間
+dt: 0.1            # 微小時間 [s]
+predict_time: 1.0  # 予測時間 [s]

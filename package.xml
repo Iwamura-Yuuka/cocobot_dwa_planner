@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cocobot_dwa_planner</name>
+  <version>0.0.0</version>
+  <description>The cocobot_dwa_planner package</description>
+  <maintainer email="amsl@todo.todo">Iwamura Yuuka</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf2</depend>
+  <depend>pedestrian_msgs</depend>
+  <depend>ccv_dynamixel_msgs</depend>
+  <depend>dynamixel_workbench_msgs</depend>
+
+</package>
