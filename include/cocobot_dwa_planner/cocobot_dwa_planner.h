@@ -56,10 +56,11 @@ private:
   void move(State& state, const double velocity, const double yawrate);                                      // 予測軌跡作成時における仮想ロボットを移動
   std::vector<State> calc_traj(const double velocity, const double yawrate);                                 // 予測軌跡を生成
   double calc_evaluation(const std::vector<State>& traj);                                                    // 評価関数を計算
-  double calc_heading_eval(const std::vector<State>& traj);                                                  // heading （1項目）の評価関数を計算
-  double calc_dist_eval(const std::vector<State>& traj);                                                     // distance（2項目）の評価関数を計算
-  double calc_vel_eval(const std::vector<State>& traj);                                                      // velocity（3項目）の評価関数を計算
-  double calc_cost_map_eval(const std::vector<State>& traj);                                                 // cost_map（4項目）の評価関数を計算
+  double calc_heading_eval(const std::vector<State>& traj);                                                  // heading（1項目）の評価関数を計算
+  double calc_glocal_heading_eval(const std::vector<State>& traj);                                           // glocal_heading（2項目）の評価関数を計算
+  double calc_dist_eval(const std::vector<State>& traj);                                                     // distance（3項目）の評価関数を計算
+  double calc_vel_eval(const std::vector<State>& traj);                                                      // velocity（4項目）の評価関数を計算
+  double calc_cost_map_eval(const std::vector<State>& traj);                                                 // cost_map（5項目）の評価関数を計算
   void visualize_traj(const std::vector<State>& traj, const ros::Publisher& pub_local_path, ros::Time now);  // 軌跡を可視化
   void ccv_control(const double  velocity, const double yawrate);                                            // CCVの制御入力
 
@@ -72,10 +73,11 @@ private:
   // yamlファイルで設定可能な変数
   int hz_;                             // ループ周波数 [Hz]
   double weight_heading_;              // 評価関数1項目　重みづけ定数
-  double weight_dist_;                 // 評価関数2項目　重みづけ定数
-  double weight_vel_;                  // 評価関数3項目　重みづけ定数
-  double weight_cost_map_;             // 評価関数4項目　重みづけ定数
-  double search_range_;                // 評価関数２項目(distance)探索範囲 [m]
+  double weight_glocal_heading_;       // 評価関数2項目　重みづけ定数
+  double weight_dist_;                 // 評価関数3項目　重みづけ定数
+  double weight_vel_;                  // 評価関数4項目　重みづけ定数
+  double weight_cost_map_;             // 評価関数5項目　重みづけ定数
+  double search_range_;                // 評価関数2項目(distance)探索範囲 [m]
   double margin_;                      // 障害物とロボットの衝突半径（マージン込み） [m]
   double min_cost_;                    // 割り当てるコストの最小値
   double min_vel_;                     // 最低並進速度 [m/s]

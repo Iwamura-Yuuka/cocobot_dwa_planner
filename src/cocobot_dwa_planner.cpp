@@ -5,6 +5,7 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   // param
   private_nh_.param("hz", hz_, {10});
   private_nh_.param("weight_heading", weight_heading_, {0.4});
+  private_nh_.param("weight_glocal_heading", weight_glocal_heading_, {0.4});
   private_nh_.param("weight_dist", weight_dist_, {0.8});
   private_nh_.param("weight_vel", weight_vel_, {0.2});
   private_nh_.param("weight_cost_map", weight_cost_map_, {0.9});
@@ -214,6 +215,7 @@ std::vector<State> CocobotDWA::calc_traj(const double velocity, const double yaw
 double CocobotDWA::calc_evaluation(const std::vector<State>& traj)
 {
   const double heading_score  = weight_heading_  * calc_heading_eval(traj);
+  const double glocal_heading_score = weight_glocal_heading_ * calc_glocal_heading_eval(traj);
   const double distance_score = weight_dist_     * calc_dist_eval(traj);
   const double velocity_score = weight_vel_      * calc_vel_eval(traj);
   const double cost_map_score = weight_cost_map_ * calc_cost_map_eval(traj);
@@ -225,6 +227,28 @@ double CocobotDWA::calc_evaluation(const std::vector<State>& traj)
 
 // heading（1項目）の評価関数を計算
 double CocobotDWA::calc_heading_eval(const std::vector<State>& traj)
+{
+  // 最終時刻におけるロボットの方位
+  const double theta = traj.back().yaw;
+
+  // 最終時刻の位置に対するゴールの方位
+  const double goal_theta = atan2(local_goal_.point.y - traj.back().y, local_goal_.point.x - traj.back().x);
+
+  // ゴールまでの方位差分
+  double target_theta = 0.0;
+  if(goal_theta > theta)
+    target_theta = goal_theta - theta;
+  else
+    target_theta = theta - goal_theta;
+
+  // headingの評価値
+  const double heading_eval = (M_PI - abs(normalize_angle(target_theta)))/M_PI; // 正規化
+
+  return heading_eval;
+}
+
+// glocal_heading（2項目）の評価関数を計算
+double CocobotDWA::calc_glocal_heading_eval(const std::vector<State>& traj)
 {
   // 最終時刻におけるロボットの方位
   const double theta = traj.back().yaw;
@@ -245,7 +269,7 @@ double CocobotDWA::calc_heading_eval(const std::vector<State>& traj)
   return heading_eval;
 }
 
-// distance（2項目）の評価関数を計算
+// distance（3項目）の評価関数を計算
 double CocobotDWA::calc_dist_eval(const std::vector<State>& traj)
 {  
   double min_dist = search_range_;  // 探索範囲で初期化
@@ -273,7 +297,7 @@ double CocobotDWA::calc_dist_eval(const std::vector<State>& traj)
   return min_dist / search_range_; // 正規化
 }
 
-// velocity（3項目）の評価関数を計算
+// velocity（4項目）の評価関数を計算
 double CocobotDWA::calc_vel_eval(const std::vector<State>& traj)
 {
   if(0.0 < traj.back().velocity) // 前進
@@ -282,7 +306,7 @@ double CocobotDWA::calc_vel_eval(const std::vector<State>& traj)
     return 0.0;
 }
 
-// cost_map（4項目）の評価関数を計算する
+// cost_map（5項目）の評価関数を計算する
 // 大きいほど良くない
 double CocobotDWA::calc_cost_map_eval(const std::vector<State>& traj)
 {
@@ -419,8 +443,10 @@ void CocobotDWA::process()
     }
 
     // msgの受け取り判定用flagをfalseに戻す
-    flag_people_states_ = false;
     flag_local_goal_ = false;
+    // flag_glocal_path_ = false;
+    flag_people_states_ = false;
+    // flag_cost_map_ = false;
 
     ros::spinOnce();
     loop_rate.sleep();
