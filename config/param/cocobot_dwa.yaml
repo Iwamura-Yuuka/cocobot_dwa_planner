@@ -10,6 +10,7 @@ weight_cost_map: 2.0  # 評価関数4項目　重みづけ定数
 # 評価関数関連（重みづけ定数以外）
 search_range: 7.0     # 評価関数２項目(distance)探索範囲 [m]
 margin: 0.55          # 障害物とロボットの衝突半径（マージン込み） [m]
+min_cost: 30.0               # 割り当てるコストの最小値（cost_map_creatorのyaml参照）
 
 # CCV(Dynamic Window関連)
 min_vel: 0.0          # 最低並進速度 [m/s]

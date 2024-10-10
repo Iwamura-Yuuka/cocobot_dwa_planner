@@ -52,12 +52,14 @@ private:
   // 引数あり関数
   double calc_dist(const double x1, const double y1, const double x2, const double y2);                      // 距離を計算
   double normalize_angle(double theta);                                                                      // 適切な角度（-M_PI ~ M_PI）を返す
+  int xy_to_grid_index(const double x, const double y);                                                      // 座標からグリッドのインデックスを返す
   void move(State& state, const double velocity, const double yawrate);                                      // 予測軌跡作成時における仮想ロボットを移動
   std::vector<State> calc_traj(const double velocity, const double yawrate);                                 // 予測軌跡を生成
-  double calc_heading_eval(const std::vector<State>& traj);                                                  // heading（1項目）の評価関数を計算
+  double calc_evaluation(const std::vector<State>& traj);                                                    // 評価関数を計算
+  double calc_heading_eval(const std::vector<State>& traj);                                                  // heading （1項目）の評価関数を計算
   double calc_dist_eval(const std::vector<State>& traj);                                                     // distance（2項目）の評価関数を計算
   double calc_vel_eval(const std::vector<State>& traj);                                                      // velocity（3項目）の評価関数を計算
-  double calc_evaluation(const std::vector<State>& traj);                                                    // 評価関数を計算
+  double calc_cost_map_eval(const std::vector<State>& traj);                                                 // cost_map（4項目）の評価関数を計算
   void visualize_traj(const std::vector<State>& traj, const ros::Publisher& pub_local_path, ros::Time now);  // 軌跡を可視化
   void ccv_control(const double  velocity, const double yawrate);                                            // CCVの制御入力
 
@@ -75,6 +77,7 @@ private:
   double weight_cost_map_;             // 評価関数4項目　重みづけ定数
   double search_range_;                // 評価関数２項目(distance)探索範囲 [m]
   double margin_;                      // 障害物とロボットの衝突半径（マージン込み） [m]
+  double min_cost_;                    // 割り当てるコストの最小値
   double min_vel_;                     // 最低並進速度 [m/s]
   double max_vel_;                     // 最高並進速度 [m/s]
   double max_yawrate_;                 // 最高旋回速度 [rad/s]

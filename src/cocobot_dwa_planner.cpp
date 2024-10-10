@@ -10,6 +10,7 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   private_nh_.param("weight_cost_map", weight_cost_map_, {0.9});
   private_nh_.param("search_range", search_range_, {7.0});
   private_nh_.param("margin", margin_, {0.5});
+  private_nh_.param("min_cost", min_cost_, {30.0});
   private_nh_.param("min_vel", min_vel_, {0.0});
   private_nh_.param("max_vel", max_vel_, {1.2});
   private_nh_.param("max_yawrate", max_yawrate_, {4.5});
@@ -29,7 +30,6 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   sub_glocal_path_ = nh_.subscribe("/glocal_path", 1, &CocobotDWA::glocal_path_callback, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_people_states_ = nh_.subscribe("/transformed_people_states", 1, &CocobotDWA::people_states_callback, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_cost_map_ = nh_.subscribe("/cost_map", 1, &CocobotDWA::cost_map_callback, this, ros::TransportHints().reliable().tcpNoDelay());
-  
 
   // publisher
   pub_cmd_vel_ = nh_.advertise<geometry_msgs::Twist>("/local/cmd_vel", 1);
@@ -174,6 +174,15 @@ double CocobotDWA::normalize_angle(double theta)
   return theta;
 }
 
+// 座標からグリッドのインデックスを返す
+int CocobotDWA::xy_to_grid_index(const double x, const double y)
+{
+  const int index_x = int(floor((x - cost_map_.info.origin.position.x) / cost_map_.info.resolution));
+  const int index_y = int(floor((y - cost_map_.info.origin.position.y) / cost_map_.info.resolution));
+
+  return index_x + (index_y * cost_map_.info.width);
+}
+
 // 予測軌跡作成時における仮想ロボットを移動
 void CocobotDWA::move(State& state, const double velocity, const double yawrate)
 {
@@ -201,6 +210,19 @@ std::vector<State> CocobotDWA::calc_traj(const double velocity, const double yaw
   return trajectory;
 }
 
+// 評価関数を計算
+double CocobotDWA::calc_evaluation(const std::vector<State>& traj)
+{
+  const double heading_score  = weight_heading_  * calc_heading_eval(traj);
+  const double distance_score = weight_dist_     * calc_dist_eval(traj);
+  const double velocity_score = weight_vel_      * calc_vel_eval(traj);
+  const double cost_map_score = weight_cost_map_ * calc_cost_map_eval(traj);
+
+  const double total_score = heading_score + distance_score + velocity_score;
+
+  return total_score;
+}
+
 // heading（1項目）の評価関数を計算
 double CocobotDWA::calc_heading_eval(const std::vector<State>& traj)
 {
@@ -208,7 +230,7 @@ double CocobotDWA::calc_heading_eval(const std::vector<State>& traj)
   const double theta = traj.back().yaw;
 
   // 最終時刻の位置に対するゴールの方位
-  const double goal_theta = atan2(local_goal_.point.y - traj.back().y, local_goal_.point.x - traj.back().x);
+  const double goal_theta = atan2(glocal_goal_.point.y - traj.back().y, glocal_goal_.point.x - traj.back().x);
 
   // ゴールまでの方位差分
   double target_theta = 0.0;
@@ -260,16 +282,27 @@ double CocobotDWA::calc_vel_eval(const std::vector<State>& traj)
     return 0.0;
 }
 
-// 評価関数を計算
-double CocobotDWA::calc_evaluation(const std::vector<State>& traj)
+// cost_map（4項目）の評価関数を計算する
+// 大きいほど良くない
+double CocobotDWA::calc_cost_map_eval(const std::vector<State>& traj)
 {
-  const double heading_score  = weight_heading_ * calc_heading_eval(traj);
-  const double distance_score = weight_dist_    * calc_dist_eval(traj);
-  const double velocity_score = weight_vel_     * calc_vel_eval(traj);
+  double total_cost = 0;  // 通過した場所の走行コストの合計値
 
-  const double total_score = heading_score + distance_score + velocity_score;
+  for(auto& state : traj)
+  {
+    const int grid_index = xy_to_grid_index(state.x, state.y);
+    double cost = cost_map_.data[grid_index];
 
-  return total_score;
+    total_cost += cost;
+  }
+
+  int traj_size = traj.size();
+  if(traj_size == 0)
+    traj_size = 1;  // ゼロ割り防止
+  
+  double cost_map_eval = total_cost / (min_cost_ * traj_size);
+
+  return cost_map_eval;
 }
 
 // 最適な制御入力を計算
