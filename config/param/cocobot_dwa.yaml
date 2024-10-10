@@ -2,10 +2,11 @@
 hz: 10  # ループ周波数 [Hz]
 
 # 評価関数の重みづけ定数
-weight_heading: 0.8   # 評価関数1項目　重みづけ定数
-weight_dist: 1.5      # 評価関数2項目　重みづけ定数
-weight_vel: 0.4       # 評価関数3項目　重みづけ定数
-weight_cost_map: 2.0  # 評価関数4項目　重みづけ定数
+weight_heading: 0.4         # 評価関数1項目　重みづけ定数
+weight_glocal_heading: 0.6  # 評価関数2項目　重みづけ定数
+weight_dist: 1.5            # 評価関数2項目　重みづけ定数
+weight_vel: 0.4             # 評価関数3項目　重みづけ定数
+weight_cost_map: 1.0        # 評価関数4項目　重みづけ定数
 
 # 評価関数関連（重みづけ定数以外）
 search_range: 7.0     # 評価関数２項目(distance)探索範囲 [m]

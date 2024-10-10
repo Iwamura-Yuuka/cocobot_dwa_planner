@@ -9,7 +9,6 @@ Panels:
         - /Path1
         - /Odometry1
         - /Odometry1/Shape1
-        - /Path3
         - /PoseArray1
         - /PointStamped2
         - /Path4
@@ -145,12 +144,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /local_map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 20
       Class: rviz/Path
@@ -177,8 +176,8 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Arrow Length: 0.30000001192092896
-      Axes Length: 0.5
-      Axes Radius: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.15000000596046448
       Class: rviz/PoseArray
       Color: 255; 25; 0
       Enabled: true
@@ -238,6 +237,16 @@ Visualization Manager:
       Topic: /glocal_path
       Unreliable: false
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: /cost_map
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -265,7 +274,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -1.5707000494003296
+      Angle: -1.575700044631958
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549

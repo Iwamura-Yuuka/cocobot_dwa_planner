@@ -5,9 +5,8 @@
     <arg name="straight_line_creator_settings" default="$(find straight_line_creator)/config/param/straight_line_creator_debug.yaml"/>
     <arg name="local_goal_maker_settings" default="$(find local_goal_maker)/config/param/local_goal_maker_debug.yaml"/>
     <arg name="pedestrian_state_predictor_settings" default="$(find pedestrian_state_predictor)/config/param/pedestrian_state_predictor_debug.yaml"/>
-    <arg name="cost_map_creator_settings" default="$(find cost_map_creator)/config/param/cost_map_creator_debug.yaml"/>
-    <arg name="density_map_creator_settings" default="$(find spaciss_density_map_creator)/config/param/spaciss_density_map_creator.yaml"/>
-    <arg name="glocal_path_planner_settings" default="$(find glocal_path_planner)/config/param/with_sdmap_creator.yaml"/>
+    <arg name="cost_map_creator_settings" default="$(find cost_map_creator)/config/param/cocobot_dwa.yaml"/>
+    <arg name="glocal_path_planner_settings" default="$(find glocal_path_planner)/config/param/cocobot_dwa.yaml"/>
     <arg name="ped_state_transformer_settings" default="$(find ped_state_transformer)/config/param/debug.yaml"/>
     <arg name="spaciss_obs_map_creator_settings" default="$(find spaciss_obs_map_creator)/config/param/spaciss_obs_map_creator_debug.yaml"/>
 
@@ -26,11 +25,9 @@
     <node pkg="cost_map_creator" type="cost_map_creator_node" name="cost_map_creator">
         <rosparam command="load" file="$(arg cost_map_creator_settings)"/>
     </node>
-    <node pkg="spaciss_density_map_creator" type="spaciss_density_map_creator_node" name="spaciss_density_map_creator">
-        <rosparam command="load" file="$(arg density_map_creator_settings)"/>
-    </node>
     <node pkg="glocal_path_planner" type="glocal_path_planner_node" name="glocal_path_planner">
         <rosparam command="load" file="$(arg glocal_path_planner_settings)"/>
+        <remap from="/density_map" to="/cost_map"/>
     </node>
     <node pkg="ped_state_transformer" type="ped_state_transformer_node" name="ped_state_transformer">
         <rosparam command="load" file="$(arg ped_state_transformer_settings)"/>
