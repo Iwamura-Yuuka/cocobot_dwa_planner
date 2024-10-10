@@ -7,6 +7,7 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   private_nh_.param("weight_heading", weight_heading_, {0.4});
   private_nh_.param("weight_dist", weight_dist_, {0.8});
   private_nh_.param("weight_vel", weight_vel_, {0.2});
+  private_nh_.param("weight_cost_map", weight_cost_map_, {0.9});
   private_nh_.param("search_range", search_range_, {7.0});
   private_nh_.param("margin", margin_, {0.5});
   private_nh_.param("min_vel", min_vel_, {0.0});
@@ -23,8 +24,11 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   private_nh_.param("predict_time", predict_time_, {3.0});
 
   // subscriber
-  sub_people_states_ = nh_.subscribe("/transformed_people_states", 1, &CocobotDWA::people_states_callback, this, ros::TransportHints().reliable().tcpNoDelay());
   sub_local_goal_ = nh_.subscribe("/local_goal", 1, &CocobotDWA::local_goal_callback, this, ros::TransportHints().reliable().tcpNoDelay());
+  sub_glocal_path_ = nh_.subscribe("/glocal_path", 1, &CocobotDWA::glocal_path_callback, this, ros::TransportHints().reliable().tcpNoDelay());
+  sub_people_states_ = nh_.subscribe("/transformed_people_states", 1, &CocobotDWA::people_states_callback, this, ros::TransportHints().reliable().tcpNoDelay());
+  sub_cost_map_ = nh_.subscribe("/cost_map", 1, &CocobotDWA::cost_map_callback, this, ros::TransportHints().reliable().tcpNoDelay());
+  
 
   // publisher
   pub_cmd_vel_ = nh_.advertise<geometry_msgs::Twist>("/local/cmd_vel", 1);
@@ -55,6 +59,15 @@ void CocobotDWA::local_goal_callback(const geometry_msgs::PointStampedConstPtr& 
     tf2::doTransform(*msg, local_goal_, transform);
 }
 
+// glocal_pathのコールバック関数
+void CocobotDWA::glocal_path_callback(const nav_msgs::PathConstPtr& msg)
+{
+  glocal_path_ = *msg;
+  
+  if(glocal_path_.poses.size() > 0)
+    flag_glocal_path_ = true;
+}
+
 // 歩行者情報のコールバック関数
 void CocobotDWA::people_states_callback(const pedestrian_msgs::PeopleStatesConstPtr& msg)
 {
@@ -67,6 +80,13 @@ void CocobotDWA::people_states_callback(const pedestrian_msgs::PeopleStatesConst
 
   people_states_.emplace(msg);
   flag_people_states_ = true;
+}
+
+// cost_mapのコールバック関数
+void CocobotDWA::cost_map_callback(const nav_msgs::OccupancyGridConstPtr& msg)
+{
+  cost_map_ = *msg;
+  flag_cost_map_ = true;
 }
 
 // 距離を計算

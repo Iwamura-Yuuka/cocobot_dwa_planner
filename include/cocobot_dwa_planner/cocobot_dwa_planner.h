@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <queue>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -44,7 +45,9 @@ public:
 private:
   // コールバック関数
   void local_goal_callback(const geometry_msgs::PointStampedConstPtr& msg);
+  void glocal_path_callback(const nav_msgs::PathConstPtr& msg);
   void people_states_callback(const pedestrian_msgs::PeopleStatesConstPtr& msg);
+  void cost_map_callback(const nav_msgs::OccupancyGridConstPtr& msg);
 
   // 引数あり関数
   double calc_dist(const double x1, const double y1, const double x2, const double y2);                      // 距離を計算
@@ -68,6 +71,7 @@ private:
   double weight_heading_;    // 評価関数1項目　重みづけ定数
   double weight_dist_;       // 評価関数2項目　重みづけ定数
   double weight_vel_;        // 評価関数3項目　重みづけ定数
+  double weight_cost_map_;   // 評価関数4項目　重みづけ定数
   double search_range_;      // 評価関数２項目(distance)探索範囲 [m]
   double margin_;            // 障害物とロボットの衝突半径（マージン込み） [m]
   double min_vel_;           // 最低並進速度 [m/s]
@@ -85,7 +89,9 @@ private:
 
   // msgの受け取り判定用
   bool flag_local_goal_ = false;
+  bool flag_glocal_path_ = false;
   bool flag_people_states_ = false;
+  bool flag_cost_map_ = false;
 
   // CCV
   State ccv_;
@@ -97,7 +103,9 @@ private:
 
   // Subscriber
   ros::Subscriber sub_local_goal_;
+  ros::Subscriber sub_glocal_path_;
   ros::Subscriber sub_people_states_;
+  ros::Subscriber sub_cost_map_;
 
   // Publisher
   ros::Publisher pub_cmd_vel_;
@@ -110,7 +118,10 @@ private:
 
   // 各種オブジェクト
   geometry_msgs::PointStamped local_goal_;                           // local_goal
+  nav_msgs::Path glocal_path_;                                       // glocal_path
+  geometry_msgs::PointStamped glocal_goal_;                          // glocal_goal
   std::queue<pedestrian_msgs::PeopleStatesConstPtr> people_states_;  // 歩行者情報
+  nav_msgs::OccupancyGrid cost_map_;                                 // コストマップ
 
 };
 
