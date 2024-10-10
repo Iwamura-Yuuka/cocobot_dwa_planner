@@ -1,107 +1,124 @@
 <?xml version="1.0"?>
 <launch>
-  <!-- config file path -->
-  <arg name="rviz_settings" default="$(find spaciss_dwa_planner)/config/rviz/debug.rviz"/>
-  <arg name="straight_line_creator_settings" default="$(find straight_line_creator)/config/param/straight_line_creator_debug.yaml"/>
-  <arg name="local_goal_maker_settings" default="$(find local_goal_maker)/config/param/local_goal_maker_debug.yaml"/>
-  <arg name="ped_state_transformer_settings" default="$(find ped_state_transformer)/config/param/debug.yaml"/>
-  <arg name="spaciss_obs_map_creator_settings" default="$(find spaciss_obs_map_creator)/config/param/spaciss_obs_map_creator_debug.yaml"/>
+    <!-- config file path -->
+    <arg name="rviz_settings" default="$(find cocobot_dwa_planner)/config/rviz/debug.rviz"/>
+    <arg name="straight_line_creator_settings" default="$(find straight_line_creator)/config/param/straight_line_creator_debug.yaml"/>
+    <arg name="local_goal_maker_settings" default="$(find local_goal_maker)/config/param/local_goal_maker_debug.yaml"/>
+    <arg name="pedestrian_state_predictor_settings" default="$(find pedestrian_state_predictor)/config/param/pedestrian_state_predictor_debug.yaml"/>
+    <arg name="cost_map_creator_settings" default="$(find cost_map_creator)/config/param/cost_map_creator_debug.yaml"/>
+    <arg name="density_map_creator_settings" default="$(find spaciss_density_map_creator)/config/param/spaciss_density_map_creator.yaml"/>
+    <arg name="glocal_path_planner_settings" default="$(find glocal_path_planner)/config/param/with_sdmap_creator.yaml"/>
+    <arg name="ped_state_transformer_settings" default="$(find ped_state_transformer)/config/param/debug.yaml"/>
+    <arg name="spaciss_obs_map_creator_settings" default="$(find spaciss_obs_map_creator)/config/param/spaciss_obs_map_creator_debug.yaml"/>
 
-  <!-- node launch -->
-  <node pkg="straight_line_creator" type="straight_line_creator_node" name="straight_line_creator">
-    <rosparam command="load" file="$(arg straight_line_creator_settings)"/>
-  </node>
-  <node pkg="local_goal_maker" type="local_goal_maker_node" name="local_goal_maker">
-    <rosparam command="load" file="$(arg local_goal_maker_settings)"/>
-    <remap from="/robot_odom" to="/sq2_ccv/diff_drive_steering_controller/odom"/>
-  </node>
-  <node pkg="ped_state_transformer" type="ped_state_transformer_node" name="ped_state_transformer">
-    <rosparam command="load" file="$(arg ped_state_transformer_settings)"/>
-    <remap from="/robot_odom" to="/sq2_ccv/diff_drive_steering_controller/odom"/>
-  </node>
-  <node pkg="spaciss_obs_map_creator" type="spaciss_obs_map_creator_node" name="spaciss_obs_map_creator">
-    <rosparam command="load" file="$(arg spaciss_obs_map_creator_settings)"/>
-    <remap from="/raw_obs_map" to="/local_map"/>
-  </node>
+    <!-- node launch -->
+    <node pkg="straight_line_creator" type="straight_line_creator_node" name="straight_line_creator">
+        <rosparam command="load" file="$(arg straight_line_creator_settings)"/>
+    </node>
+    <node pkg="local_goal_maker" type="local_goal_maker_node" name="local_goal_maker">
+        <rosparam command="load" file="$(arg local_goal_maker_settings)"/>
+        <remap from="/robot_odom" to="/sq2_ccv/diff_drive_steering_controller/odom"/>
+    </node>
+    <node pkg="pedestrian_state_predictor" type="pedestrian_state_predictor_node" name="pedestrian_state_predictor">
+        <rosparam command="load" file="$(arg pedestrian_state_predictor_settings)"/>
+        <remap from="/robot_odom" to="/sq2_ccv/diff_drive_steering_controller/odom"/>
+    </node>
+    <node pkg="cost_map_creator" type="cost_map_creator_node" name="cost_map_creator">
+        <rosparam command="load" file="$(arg cost_map_creator_settings)"/>
+    </node>
+    <node pkg="spaciss_density_map_creator" type="spaciss_density_map_creator_node" name="spaciss_density_map_creator">
+        <rosparam command="load" file="$(arg density_map_creator_settings)"/>
+    </node>
+    <node pkg="glocal_path_planner" type="glocal_path_planner_node" name="glocal_path_planner">
+        <rosparam command="load" file="$(arg glocal_path_planner_settings)"/>
+    </node>
+    <node pkg="ped_state_transformer" type="ped_state_transformer_node" name="ped_state_transformer">
+        <rosparam command="load" file="$(arg ped_state_transformer_settings)"/>
+        <remap from="/robot_odom" to="/sq2_ccv/diff_drive_steering_controller/odom"/>
+    </node>
+    <node pkg="spaciss_obs_map_creator" type="spaciss_obs_map_creator_node" name="spaciss_obs_map_creator">
+        <rosparam command="load" file="$(arg spaciss_obs_map_creator_settings)"/>
+        <remap from="/raw_obs_map" to="/local_map"/>
+    </node>
 
-  <!-- rviz -->
-  <node pkg="rviz" type="rviz" name="planner_rviz" args="-d $(arg rviz_settings)"/>
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="planner_rviz" args="-d $(arg rviz_settings)"/>
 
-  <!-- =============== Move ccv =============== -->
-  <!-- config file path -->
-  <arg name="cocobot_dwa_planner_settings" default="$(find cocobot_dwa_planner)/config/param/cocobot_dwa.yaml"/>
+    <!-- =============== Move ccv =============== -->
+    <!-- config file path -->
+    <arg name="cocobot_dwa_planner_settings" default="$(find cocobot_dwa_planner)/config/param/cocobot_dwa.yaml"/>
 
-  <!-- node launch -->
-  <node pkg="cocobot_dwa_planner" type="cocobot_dwa_planner_node" name="cocobot_dwa_planner" output="screen">
-    <rosparam command="load" file="$(arg cocobot_dwa_planner_settings)"/>
-    <remap from="/local/cmd_vel" to="/sq2_ccv/diff_drive_steering_controller/cmd_vel"/>
-  </node>
+    <!-- node launch -->
+    <node pkg="cocobot_dwa_planner" type="cocobot_dwa_planner_node" name="cocobot_dwa_planner" output="screen">
+        <rosparam command="load" file="$(arg cocobot_dwa_planner_settings)"/>
+        <remap from="/local/cmd_vel" to="/sq2_ccv/diff_drive_steering_controller/cmd_vel"/>
+    </node>
 
-  <node name="steering_angle_publisher" pkg="ccv_pure_pursuit_steering" type="steering_angle_publisher"/>
+    <node name="steering_angle_publisher" pkg="ccv_pure_pursuit_steering" type="steering_angle_publisher"/>
   
-  <!-- =============== Simulator =============== -->
-  <!-- param -->
-  <arg name="kbd_teleop" default="false"/>
-  <arg name="rqt_teleop" default="false"/>
-  <arg name="visualize" default="true"/>
-  <arg name="with_robot" default="false"/>
+    <!-- =============== Simulator =============== -->
+    <!-- param -->
+    <arg name="kbd_teleop" default="false"/>
+    <arg name="rqt_teleop" default="false"/>
+    <arg name="visualize" default="true"/>
+    <arg name="with_robot" default="false"/>
 
-  <arg name="simulation_factor" default="1.0"/> <!-- Speed up -->
-  <arg name="update_rate" default="25.0"/> <!-- Hz -->
-  <arg name="ns" default=""/>
-  <arg name="robot_description" default="$(find experimental_package)/models/zoe/urdf/$(arg ns)/zoe.urdf"/>
+    <arg name="simulation_factor" default="1.0"/> <!-- Speed up -->
+    <arg name="update_rate" default="25.0"/> <!-- Hz -->
+    <arg name="ns" default=""/>
+    <arg name="robot_description" default="$(find experimental_package)/models/zoe/urdf/$(arg ns)/zoe.urdf"/>
 
-  <arg name="pose_initial_x" default="0.0"/>
-  <arg name="pose_initial_y" default="0.0"/>
-  <arg name="pose_initial_theta" default="0.0"/>
-  <arg name="max_robot_speed" default="2.5"/>
+    <arg name="pose_initial_x" default="0.0"/>
+    <arg name="pose_initial_y" default="0.0"/>
+    <arg name="pose_initial_theta" default="0.0"/>
+    <arg name="max_robot_speed" default="2.5"/>
 
-  <!-- launch -->
-  <include file="$(find pedsim_simulator)/launch/simulator.launch">
-    <arg name="kbd_teleop" value="$(arg kbd_teleop)"/>
-    <arg name="rqt_teleop" value="$(arg rqt_teleop)"/>
-    <arg name="scene_file" value="$(find experimental_package)scenarios/empty_area/wide_empty_area50.xml"/>
-    <arg name="with_robot" value="$(arg with_robot)"/>
-    <arg name="robot_description" value="$(arg robot_description)"/>
-    <arg name="simulation_factor" value="$(arg simulation_factor)"/>
-    <arg name="update_rate" value="$(arg update_rate)"/>
-    <arg name="default_queue_size" value="10"/>
-    <arg name="max_robot_speed" value="$(arg max_robot_speed)"/>
-    <arg name="robot_mode" value="1"/>
-    <arg name="enable_groups" value="true"/>
-    <arg name="group_size_lambda" default="0.8"/>
-    <arg name="groups_couples_proportion" default="0.05"/>
-    <arg name="groups_friends_proportion" default="0.1"/>
-    <arg name="groups_families_proportion" default="0.05"/>
-    <arg name="groups_coworkers_proportion" default="0.8"/>
-    <arg name="pose_initial_x" value="$(arg pose_initial_x)"/>
-    <arg name="pose_initial_y" value="$(arg pose_initial_y)"/>
-    <arg name="pose_initial_theta" value="$(arg pose_initial_theta)"/>
-    <arg name="ns" value="$(arg ns)"/>
-  </include>
+    <!-- launch -->
+    <include file="$(find pedsim_simulator)/launch/simulator.launch">
+        <arg name="kbd_teleop" value="$(arg kbd_teleop)"/>
+        <arg name="rqt_teleop" value="$(arg rqt_teleop)"/>
+        <arg name="scene_file" value="$(find experimental_package)scenarios/empty_area/wide_empty_area50.xml"/>
+        <arg name="with_robot" value="$(arg with_robot)"/>
+        <arg name="robot_description" value="$(arg robot_description)"/>
+        <arg name="simulation_factor" value="$(arg simulation_factor)"/>
+        <arg name="update_rate" value="$(arg update_rate)"/>
+        <arg name="default_queue_size" value="10"/>
+        <arg name="max_robot_speed" value="$(arg max_robot_speed)"/>
+        <arg name="robot_mode" value="1"/>
+        <arg name="enable_groups" value="true"/>
+        <arg name="group_size_lambda" default="0.8"/>
+        <arg name="groups_couples_proportion" default="0.05"/>
+        <arg name="groups_friends_proportion" default="0.1"/>
+        <arg name="groups_families_proportion" default="0.05"/>
+        <arg name="groups_coworkers_proportion" default="0.8"/>
+        <arg name="pose_initial_x" value="$(arg pose_initial_x)"/>
+        <arg name="pose_initial_y" value="$(arg pose_initial_y)"/>
+        <arg name="pose_initial_theta" value="$(arg pose_initial_theta)"/>
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
 
-  <!-- Create a transform sender for linking these frames: static_transform_publisher x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
-  <node name="tf_footprint_base" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 $(arg ns)/base_footprint $(arg ns)/base_link 100"/>
+    <!-- Create a transform sender for linking these frames: static_transform_publisher x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
+    <node name="tf_footprint_base" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 $(arg ns)/base_footprint $(arg ns)/base_link 100"/>
 
-  <!-- Visualizer -->
-  <include file="$(find pedsim_visualizer)/launch/visualizer.launch">
-    <arg name="ns" value="$(arg ns)"/>
-  </include>
+   <!-- Visualizer -->
+    <include file="$(find pedsim_visualizer)/launch/visualizer.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
 
-  <!-- visualize ccv -->
-  <param name="robot_description" command="$(find xacro)/xacro $(find sq2_ccv_description)/robot/sq2_ccv.urdf"/>
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    <!-- visualize ccv -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find sq2_ccv_description)/robot/sq2_ccv.urdf"/>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
-  <!-- rviz -->
-  <node pkg="rviz" type="rviz" name="sim_rviz" args="-d $(find pedsim_simulator)/rviz/with_ccv$(arg ns).rviz" if="$(arg visualize)"/>
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="sim_rviz" args="-d $(find pedsim_simulator)/rviz/with_ccv$(arg ns).rviz" if="$(arg visualize)"/>
 
-   <!-- =============== data_matomerun =============== -->
-  <!-- config file path -->
-  <arg name="human_dist_calculator_settings" default="$(find robomech2024)/config/param/st50_hdc.yaml"/>
+    <!-- =============== data_matomerun =============== -->
+    <!-- config file path -->
+    <arg name="human_dist_calculator_settings" default="$(find robomech2024)/config/param/st50_hdc.yaml"/>
 
-  <!-- node launch -->
-  <node pkg="human_dist_calculator" type="human_dist_calculator_node" name="human_dist_calculator" output="screen">
-    <rosparam command="load" file="$(arg human_dist_calculator_settings)"/>
-  </node>
+    <!-- node launch -->
+    <node pkg="human_dist_calculator" type="human_dist_calculator_node" name="human_dist_calculator" output="screen">
+        <rosparam command="load" file="$(arg human_dist_calculator_settings)"/>
+    </node>
 </launch>

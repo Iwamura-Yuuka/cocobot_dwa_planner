@@ -16,6 +16,7 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   private_nh_.param("max_accel", max_accel_, {10.0});
   private_nh_.param("max_yawaccel", max_yawaccel_, {10.0});
   private_nh_.param("goal_tolerance", goal_tolerance_, {0.3});
+  private_nh_.param("dist_to_update_glocal_goal", dist_to_update_glocal_goal_, {1.5});
   private_nh_.param("world_frame", world_frame_, {"odom"});
   private_nh_.param("robot_frame", robot_frame_, {"base_footprint"});
   private_nh_.param("vel_reso", vel_reso_, {0.1});
@@ -37,6 +38,7 @@ CocobotDWA::CocobotDWA():private_nh_("~")
   // debug
   pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths", 1);
   pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path", 1);
+  pub_glocal_goal_ = nh_.advertise<geometry_msgs::PointStamped>("/glocal_goal", 1);
 }
 
 // local_goalコールバック関数
@@ -102,7 +104,7 @@ double CocobotDWA::calc_dist(const double x1, const double y1, const double x2, 
 bool CocobotDWA::is_goal()
 {
   // msg受信済みか確認
-  if((flag_local_goal_) && (flag_people_states_))
+  if((flag_local_goal_) && (flag_glocal_path_) && (flag_people_states_) && (flag_cost_map_))
   {
     const double dist = calc_dist(local_goal_.point.x, local_goal_.point.y, 0.0, 0.0);
 
@@ -115,6 +117,33 @@ bool CocobotDWA::is_goal()
   {
     return false;
   }
+}
+
+// glocal_goalの更新
+void CocobotDWA::update_glocal_goal()
+{
+  int glocal_path_index = 0;  // glocal_pathのインデックス
+
+  double dist_to_glocal_goal = calc_dist(glocal_path_.poses[glocal_path_index].pose.position.x, glocal_path_.poses[glocal_path_index].pose.position.y, 0.0, 0.0);
+
+  while(dist_to_glocal_goal < dist_to_update_glocal_goal_)
+  {
+    glocal_path_index++;
+    dist_to_glocal_goal = calc_dist(glocal_path_.poses[glocal_path_index].pose.position.x, glocal_path_.poses[glocal_path_index].pose.position.y, 0.0, 0.0);
+
+    // glocal_path_indexがglocal_path_index.posesの配列の要素数を超えたら、glocal_goalとしてglocal_pathのゴールを設定
+    if(glocal_path_index >= glocal_path_.poses.size())
+    {
+      glocal_path_index = glocal_path_.poses.size() - 1;
+      break;
+    }
+  }
+
+  // glocal_goalの更新
+  glocal_goal_.header.frame_id = robot_frame_;
+  glocal_goal_.point.x = glocal_path_.poses[glocal_path_index].pose.position.x;
+  glocal_goal_.point.y = glocal_path_.poses[glocal_path_index].pose.position.y;
+  pub_glocal_goal_.publish(glocal_goal_);  // デバック用
 }
 
 // ダイナミックウィンドウを計算
@@ -347,7 +376,8 @@ void CocobotDWA::process()
   {
     if(is_goal())
     {
-      std::vector<double> input = calc_input();
+      update_glocal_goal();                      // glocal_goalを更新
+      std::vector<double> input = calc_input();  // 最適な制御入力を計算
       ccv_control(input[0], input[1]);
     }
     else
