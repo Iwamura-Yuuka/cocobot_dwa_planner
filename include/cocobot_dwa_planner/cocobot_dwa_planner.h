@@ -100,6 +100,14 @@ private:
   bool flag_people_states_ = false;
   bool flag_cost_map_ = false;
 
+  // glocal_pathの更新判定用
+  bool flag_sub_glocal_path_ = false;
+  int sub_glocal_path_count_ = 0;
+
+  // cost_mapの更新判定用
+  bool flag_sub_cost_map_ = false;
+  int sub_cost_map_count_ = 0;
+
   // CCV
   State ccv_;
   DynamicWindow dw_;

@@ -68,7 +68,11 @@ void CocobotDWA::glocal_path_callback(const nav_msgs::PathConstPtr& msg)
   glocal_path_ = *msg;
   
   if(glocal_path_.poses.size() > 0)
+  {
     flag_glocal_path_ = true;
+    flag_sub_glocal_path_ = true;
+    sub_glocal_path_count_ = 0;  // glocal_pathの更新待ち回数を初期化
+  }
 }
 
 // 歩行者情報のコールバック関数
@@ -90,6 +94,8 @@ void CocobotDWA::cost_map_callback(const nav_msgs::OccupancyGridConstPtr& msg)
 {
   cost_map_ = *msg;
   flag_cost_map_ = true;
+  flag_sub_cost_map_ = true;
+  sub_cost_map_count_ = 0;  // cost_mapの更新待ち回数を初期化
 }
 
 // 距離を計算
@@ -104,8 +110,26 @@ double CocobotDWA::calc_dist(const double x1, const double y1, const double x2, 
 // goalに着くまでtrueを返す
 bool CocobotDWA::is_goal()
 {
+  // glocal_pathが更新されていない回数をカウント
+  if(flag_glocal_path_ == false)
+  {
+    sub_glocal_path_count_++;
+    
+    if(sub_glocal_path_count_ > 3)  // 3回以上glocal_pathが更新されていない場合はglocal_pathのノードが正常に動作していないと判断
+      flag_sub_glocal_path_ = false;
+  }
+
+  // cost_mapが更新されていない回数をカウント
+  if(flag_cost_map_ == false)
+  {
+    sub_cost_map_count_++;
+    
+    if(sub_cost_map_count_ > 3)  // 3回以上cost_mapが更新されていない場合はcost_mapのノードが正常に動作していないと判断
+      flag_sub_cost_map_ = false;
+  }
+
   // msg受信済みか確認
-  if((flag_local_goal_) && (flag_glocal_path_) && (flag_people_states_) && (flag_cost_map_))
+  if((flag_local_goal_) && (flag_sub_glocal_path_) && (flag_people_states_) && (flag_sub_cost_map_))
   {
     const double dist = calc_dist(local_goal_.point.x, local_goal_.point.y, 0.0, 0.0);
 
@@ -444,9 +468,9 @@ void CocobotDWA::process()
 
     // msgの受け取り判定用flagをfalseに戻す
     flag_local_goal_ = false;
-    // flag_glocal_path_ = false;
+    flag_glocal_path_ = false;
     flag_people_states_ = false;
-    // flag_cost_map_ = false;
+    flag_cost_map_ = false;
 
     ros::spinOnce();
     loop_rate.sleep();
