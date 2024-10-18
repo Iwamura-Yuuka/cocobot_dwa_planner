@@ -9,26 +9,26 @@ weight_vel: 0.4             # 評価関数3項目　重みづけ定数
 weight_cost_map: 0.6        # 評価関数4項目　重みづけ定数
 
 # 評価関数関連（重みづけ定数以外）
-search_range: 7.0     # 評価関数２項目(distance)探索範囲 [m]
-margin: 0.55          # 障害物とロボットの衝突半径（マージン込み） [m]
-min_cost: 30.0               # 割り当てるコストの最小値（cost_map_creatorのyaml参照）
+search_range: 7.0           # 評価関数２項目(distance)探索範囲 [m]
+margin: 0.55                # 障害物とロボットの衝突半径（マージン込み） [m]
+min_cost: 30.0              # 割り当てるコストの最小値（cost_map_creatorのyaml参照）
 
 # CCV(Dynamic Window関連)
-min_vel: 0.0          # 最低並進速度 [m/s]
-max_vel: 1.2          # 最高並進速度 [m/s]
-max_yawrate: 4.5      # 最高旋回速度 [rad/s]
-max_accel: 100.0      # 最高並進加速度 [m/s^2]
-max_yawaccel: 100.0   # 最高旋回加速度 [rad/s^2]
+min_vel: 0.0                # 最低並進速度 [m/s]
+max_vel: 1.2                # 最高並進速度 [m/s]
+max_yawrate: 4.5            # 最高旋回速度 [rad/s]
+max_accel: 100.0            # 最高並進加速度 [m/s^2]
+max_yawaccel: 100.0         # 最高旋回加速度 [rad/s^2]
 
 # 許容誤差[m]
-goal_tolerance: 0.5   # goalに対する許容誤差 [m]
+goal_tolerance: 0.5         # goalに対する許容誤差 [m]
 
 # glocal_goal
 dist_to_update_glocal_goal: 1.5  # glocal_goalを更新する基準となるロボットとglocal_goalの距離 [m]
 
 # frame_id
-world_frame: "odom"            # 目標軌道
-robot_frame: "base_footprint"  # ロボット
+world_frame: "odom"              # 目標軌道
+robot_frame: "base_footprint"    # ロボット
 
 # 速度
 vel_reso: 0.1       # 並進速度を計算するときの刻み幅 [m/s]
