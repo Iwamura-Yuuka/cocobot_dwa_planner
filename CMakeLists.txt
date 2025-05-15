@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(cocobot_dwa_planner)
 
-add_compile_options(-std=c++11 -O3 -g -Wall)
+# add_compile_options(-std=c++11 -O3 -g -Wall)
+add_compile_options(-std=c++17 -O3 -g -Wall)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
